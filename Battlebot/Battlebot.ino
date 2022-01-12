@@ -1,7 +1,8 @@
 //Code for Oklahoma State Battlebots Robot
 
 //System control variables
-#define LOOP_DELAY  100
+#define LOOP_DELAY  10
+#define INPUT_SENSITIVITY 10
 int maxSpeed;
 
 // Radio Input Connections
@@ -17,8 +18,8 @@ int maxSpeed;
 #define IN1 9
 #define IN2 10
 #define ENB 11
-#define IN1 12
-#define IN2 13
+#define IN3 12
+#define IN4 13
 
 //Radio Communication values
 int ch1Value;
@@ -42,12 +43,12 @@ void setup()
   pinMode(CH6, INPUT);
 
   //Set motor pins as outputs
-  pinMode(enA, OUTPUT);
-  pinMode(enB, OUTPUT);
-  pinMode(in1, OUTPUT);
-  pinMode(in2, OUTPUT);
-  pinMode(in3, OUTPUT);
-  pinMode(in4, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  pinMode(ENB, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
 
   resetMotors();
 
@@ -57,6 +58,7 @@ void loop()
 {
   readRadioValues();
   printRadioValues();
+  drive();
   delay(LOOP_DELAY);
 }
 
@@ -79,12 +81,13 @@ bool readSwitch(byte channelInput, bool defaultValue) {
 
 void readRadioValues()
 {
-  ch1Value = readChannel(CH1, -100, 100, 0);
-  ch2Value = readChannel(CH2, -100, 100, 0);
-  ch3Value = readChannel(CH3, -100, 100, -100);
-  ch4Value = readChannel(CH4, -100, 100, 0);
-  ch5Value = readChannel(CH5, -100, 100, 0);
-  ch6Value = readChannel(CH6, -100, 100, 0);
+  ch1Value = readChannel(CH1, -255, 255, 0);
+  ch2Value = readChannel(CH2, -255, 255, 0);
+  ch3Value = readChannel(CH3, 0, 255, 0);
+  ch4Value = readChannel(CH4, -255, 255, 0);
+  ch5Value = readChannel(CH5, 0, 255, 0);
+  ch6Value = readChannel(CH6, 0, 255, 0);
+  maxSpeed = ch5Value;
 }
 
 void printRadioValues()
@@ -106,16 +109,40 @@ void printRadioValues()
 void resetMotors()
 {
   // Turn off motors - Initial state
-  digitalWrite(in1, LOW);
-  digitalWrite(in2, LOW);
-  digitalWrite(in3, LOW);
-  digitalWrite(in4, LOW);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
 }
 
-//CH 5 is a throttle limit
-//CH 2 is for forwards and backwards
-//CH 4 is for left and right
-void channelMapping()
+void turnOnMotorsForward()
 {
-  
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+}
+
+void turnOnMotorsBackwards()
+{
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+}
+
+void drive()
+{
+  driveStraight(ch2Value);
+}
+
+void driveStraight(int speedVal)
+{
+  int speedValMag = abs(speedVal);
+  if (speedVal < -INPUT_SENSITIVITY)
+    turnOnMotorsBackwards();
+  else
+    turnOnMotorsForward();
+  analogWrite(ENA, speedValMag);
+  analogWrite(ENB, speedValMag);
 }
