@@ -154,6 +154,7 @@ void turnOnMotorsBackwards()
 void drive()
 {
   driveStraight(ch2Value);
+  turn(ch1Value);
 }
 
 void driveStraight(int speedVal)
@@ -161,18 +162,35 @@ void driveStraight(int speedVal)
   int speedValMag = abs(speedVal);
   if (speedValMag > INPUT_SENSITIVITY)
   {
-    if (speedVal < -INPUT_SENSITIVITY)
+    if (speedVal < 0)
       turnOnMotorsBackwards();
     else
       turnOnMotorsForward();
   }
   analogWrite(ENA, speedValMag);
   analogWrite(ENB, speedValMag);
+  //  else
+  //    resetMotors();
 }
 
-//void turn(int speedVal)
-//{
-//  int speedValMag = abs(speedVal);
-//  if (speedVal < -INPUT_SENSITIVITY) //stick is turned left, should turn left
-//
-//}
+void turn(int speedVal)
+{
+  int speedValMag = abs(speedVal);
+  if (speedValMag > INPUT_SENSITIVITY)
+  {
+    if (speedVal < 0) //stick is turned left, should turn left
+    {
+      turnOnLeftMotorBackwards();
+      turnOnRightMotorForward();
+    }
+    else
+    {
+      turnOnLeftMotorForward();
+      turnOnRightMotorBackwards();
+    }
+    analogWrite(ENA, speedValMag);
+    analogWrite(ENB, speedValMag);
+  }
+  //  else
+  //    resetMotors();
+}
