@@ -3,6 +3,8 @@
 //System control variables
 #define LOOP_DELAY  10
 #define INPUT_SENSITIVITY 10
+#define WEAPON_INPUT_SENSITIVITY  20
+#define DISCONNECT_SENSITIVITY  600
 int maxSpeed;
 
 // Radio Input Connections
@@ -22,7 +24,10 @@ int maxSpeed;
 #define IN4 13
 
 //Speed Controller Pins
-#define SPEED 11
+#define SPEED_PIN 11
+
+//Disconnect pin
+#define DISCONNECT  A1
 
 //Radio Communication values
 int ch1Value;
@@ -54,7 +59,7 @@ void setup()
   pinMode(IN4, OUTPUT);
 
   //Set Speed Controller pin 
-  pinMode(SPEED, OUTPUT);
+  pinMode(SPEED_PIN, OUTPUT);
 
   resetMotors();
 
@@ -65,7 +70,12 @@ void loop()
   readRadioValues();
   printRadioValues();
   drive();
-  weaponSpin();
+  weaponSpin(ch5Value);
+  int val = analogRead(DISCONNECT);
+  if(val >= 600)
+    {
+      shutoff();
+    }
   delay(LOOP_DELAY);
 }
 
@@ -166,24 +176,22 @@ void drive()
 
 void driveStraight(int speedVal)
 {
-  int speedValMag = abs(speedVal);
-  if (speedValMag > INPUT_SENSITIVITY)
+  if (abs(speedVal) > INPUT_SENSITIVITY)
   {
     if (speedVal < 0)
       turnOnMotorsBackwards();
     else
       turnOnMotorsForward();
   }
-  analogWrite(ENA, speedValMag);
-  analogWrite(ENB, speedValMag);
-  //  else
-  //    resetMotors();
+  analogWrite(ENA, speedVal);
+  analogWrite(ENB, speedVal);
+    else
+      resetMotors();
 }
 
 void turn(int speedVal)
 {
-  int speedValMag = abs(speedVal);
-  if (speedValMag > INPUT_SENSITIVITY)
+  if (abs(speedVal) > INPUT_SENSITIVITY)
   {
     if (speedVal < 0) //stick is turned left, should turn left
     {
@@ -195,18 +203,26 @@ void turn(int speedVal)
       turnOnLeftMotorForward();
       turnOnRightMotorBackwards();
     }
-    analogWrite(ENA, speedValMag);
-    analogWrite(ENB, speedValMag);
+    analogWrite(ENA, speedVal);
+    analogWrite(ENB, speedVal);
   }
-  //  else
-  //    resetMotors();
+    else
+      resetMotors();
 }
 
-void weaponSpin()
+void weaponSpin(int spinSpeed)
 {
-  if(ch5Value > 20)
-    analogWrite(SPEED, ch5Value);
+  if(spinSpeed > WEAPON_INPUT_SENSITIVITY)
+    analogWrite(SPEED_PIN, spinSpeed);
   else
-    analogWrite(SPEED, 0);
+    analogWrite(SPEED_PIN, 0);
   
+}
+
+void shutoff()
+{
+  resetMotors();
+  weaponSpin(0);
+  Serial.println("POSSIBLE EMERGENCY SHUTOFF!");
+  delay(9999999999999);
 }
