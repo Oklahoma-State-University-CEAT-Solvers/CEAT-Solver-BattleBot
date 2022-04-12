@@ -13,12 +13,12 @@
 //Pulled this code from https://dronebotworkshop.com/radio-control-arduino-car/
  
 // Define Input Connections
-#define CH1 3
-#define CH2 5
-#define CH3 6
-#define CH4 9
-#define CH5 10
-#define CH6 11
+#define CH1 2
+#define CH2 3
+#define CH3 4
+#define CH4 5
+#define CH5 6
+#define CH6 7
  
 // Integers to represent values from sticks and pots
 int ch1Value;
@@ -48,7 +48,7 @@ bool readSwitch(byte channelInput, bool defaultValue){
  
 void setup(){
   // Set up serial monitor
-  Serial.begin(115200);
+  Serial.begin(9600);
   
   // Set all pins as inputs
   pinMode(CH1, INPUT);
@@ -57,18 +57,24 @@ void setup(){
   pinMode(CH4, INPUT);
   pinMode(CH5, INPUT);
   pinMode(CH6, INPUT);
+
+  //For early testing
+  pinMode(8, OUTPUT);
+  pinMode(9, OUTPUT);
+  digitalWrite(8, HIGH);
+  digitalWrite(9, LOW);
 }
  
  
 void loop() {
   
   // Get values for each channel
-  ch1Value = readChannel(CH1, -100, 100, 0);
-  ch2Value = readChannel(CH2, -100, 100, 0);
-  ch3Value = readChannel(CH3, -100, 100, -100);
-  ch4Value = readChannel(CH4, -100, 100, 0);
-  ch5Value = readChannel(CH5, -100, 100, 0);
-  ch6Value = readChannel(CH6, -100, 100, 0);
+  ch1Value = readChannel(CH1, -255, 255, 0);
+  ch2Value = readChannel(CH2, -255, 255, 0);
+  ch3Value = readChannel(CH3, 0, 255, 0);
+  ch4Value = readChannel(CH4, -255, 255, 0);
+  ch5Value = readChannel(CH5, 0, 255, 0);
+  ch6Value = readChannel(CH6, 0, 255, 0);
   
   // Print to Serial Monitor
   Serial.print("Ch1: ");
@@ -84,5 +90,5 @@ void loop() {
   Serial.print(" | Ch6: ");
   Serial.println(ch6Value);
   
-  delay(5);
+  delay(20);
 }

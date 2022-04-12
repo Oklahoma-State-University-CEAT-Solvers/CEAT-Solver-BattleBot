@@ -14,12 +14,15 @@ int maxSpeed;
 #define CH6 7 //Right potentiometer
 
 //Motor Bridge Connections
-#define ENA 8
-#define IN1 9
-#define IN2 10
-#define ENB 11
+#define ENA 9
+#define IN1 8
+#define IN2 A0
+#define ENB 10
 #define IN3 12
 #define IN4 13
+
+//Speed Controller Pins
+#define SPEED 11
 
 //Radio Communication values
 int ch1Value;
@@ -32,7 +35,7 @@ int ch6Value;
 void setup()
 {
   //Set up serial monitor
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   //Set radio pins as inputs
   pinMode(CH1, INPUT);
@@ -50,6 +53,9 @@ void setup()
   pinMode(IN3, OUTPUT);
   pinMode(IN4, OUTPUT);
 
+  //Set Speed Controller pin 
+  pinMode(SPEED, OUTPUT);
+
   resetMotors();
 
 }
@@ -59,6 +65,7 @@ void loop()
   readRadioValues();
   printRadioValues();
   drive();
+  weaponSpin();
   delay(LOOP_DELAY);
 }
 
@@ -87,7 +94,7 @@ void readRadioValues()
   ch4Value = readChannel(CH4, -255, 255, 0);
   ch5Value = readChannel(CH5, 0, 255, 0);
   ch6Value = readChannel(CH6, 0, 255, 0);
-  maxSpeed = ch5Value;
+  maxSpeed = ch6Value;
 }
 
 void printRadioValues()
@@ -193,4 +200,13 @@ void turn(int speedVal)
   }
   //  else
   //    resetMotors();
+}
+
+void weaponSpin()
+{
+  if(ch5Value > 20)
+    analogWrite(SPEED, ch5Value);
+  else
+    analogWrite(SPEED, 0);
+  
 }
